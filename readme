@@ -1,0 +1,263 @@
+
+using System;
+using System.Collections.Generic;
+
+namespace Matrixmulti
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string input = string.Empty; // used for all user input
+
+            bool cont = true; // determines whether or not we enter the "main program loop"
+            #region Main Program Loop
+            while (cont)
+            {
+                Console.Write("\nPlease enter the dimension of the lattice: "); // user prompt
+
+                input = Console.ReadLine(); // capture user input as string and assign it to "input"
+
+                if (int.TryParse(input, out int inputInt) && inputInt > 0) // int.TryParse returns boolean value (true if successful) and outputs (via "out" keyword)... we also make sure the inputted no. of dimensions is a REAL NUMBER
+                {
+                    List<List<int>> matrixX = new List<List<int>>(); // define 1st (X) matrix
+                    string output = string.Empty; // define string used for all output
+
+                    #region X Matrix User Input Parsing
+                    for (int i = 0; i < inputInt; i++) // loops as many times as there are dimensions
+                    {
+                        bool error = false; // define bool error and set to false
+                        do // only happens multiple times if there are errors
+                        {
+                            if (error) // if there was an error, notify the user
+                            {
+                                Console.WriteLine("Error. Must be an nxn matrix. (EX: A matrix in the 3rd dimension must have 3 elements)");
+                            }
+
+                            error = false; // reset error bool to false
+                            Console.Write($"\nPlease input X{i + 1} (delimited by commas ',' ...integers only): "); // input prompt
+
+                            input = Console.ReadLine();
+
+                            input.Replace(" ", string.Empty); // get rid of any spaces that may have been entered by habit
+                            string[] inputs = input.Split(","); // split the input string by using a comma (',') as a delimeter and assign the value into a new string array
+
+                            if (inputs.Length != inputInt) // check to see if the new string array has the same number of strings as the matrix has dimensions
+                            {
+                                error = true; // if not, throw an error
+                            }
+                            else // else, continue
+                            {
+                                List<int> parsedInputs = new List<int>();
+
+                                for (int ii = 0; ii < inputs.Length; ii++) // parse each string segment
+                                {
+                                    if (int.TryParse(inputs[ii], out int inputsInt))
+                                    {
+                                        parsedInputs.Add(inputsInt); // if good, add it to a list of int
+                                    }
+                                    else
+                                    {
+                                        error = true; // if bad, set error to true and break the loop (it's a waste of time+memory to continue looping)
+                                        break;
+                                    }
+                                }
+                                if (!error) // make sure there's no error, if so it's a waste of time+memory to continue looping
+                                {
+                                    output = "Parsed Input: ";
+                                    for (int pii = 0; pii < parsedInputs.Count; pii++)
+                                    {
+                                        output += $"{parsedInputs[pii]}, ";
+                                    }
+                                    output = $"{output.Substring(0, output.Length - 2)}."; // because we add ", " after each parsed int, we remove the last 2 chars of the output string and then replace it with "." so it looks good
+
+                                    Console.WriteLine(output);
+
+                                    matrixX.Add(parsedInputs); // add the list of ints to the matrix
+                                }
+                            }
+                        }
+                        while (error); // redo above code block if an error is hit
+                    }
+                    #endregion
+
+                    #region X Matrix Output Building
+                    output = "\nThe matrix X is:\n";
+                    for (int i1 = 0; i1 < matrixX.Count; i1++)
+                    {
+                        output += $"X{i1 + 1} [";
+                        for (int i2 = 0; i2 < matrixX[i1].Count; i2++)
+                        {
+                            output += $"{matrixX[i1][i2]}, ";
+                            if (i2 == matrixX[i1].Count - 1)
+                                output = output.Substring(0, output.Length - 2);
+                        }
+                        output += $"]\n";
+                    }
+                    Console.Write(output);
+
+                    // 1st diagonal calc 
+                    int diag1 = 1;
+                    for (int i = 0; i < inputInt; i++)
+                    {
+                        diag1 *= matrixX[i][i];
+                    }
+
+                    // 2nd diagonal calc 
+                    int diag2 = 1;
+                    for (int i = 0; i < inputInt; i++)
+                    {
+                        diag2 *= matrixX[inputInt - (i + 1)][i]; // to get the "reverse" (2nd) diagonal we subtract the index of the iterator ("i") plus one (i+1) from the inputInt (which is equal to the number of dimensions and, therefore, the total iterations we shall complete)
+                    }
+
+                    int det = diag1 - diag2; // calculate determinant
+
+                    Console.WriteLine($"\nThe determinant of X, (det(X)) is: {det}");
+                    #endregion
+
+                    if (det == 0) // if the determinate is 0, the matrix does not form a basis for the lattice, BACK TO START
+                        Console.WriteLine("Matrix does not form a basis for the lattice (linearly dependent)...");
+                    else // else, CONTINUE
+                    {
+                        List<List<int>> matrixC = new List<List<int>>();
+                        output = string.Empty;
+
+                        for (int i = 0; i < inputInt; i++)
+                        {
+                            bool error = false;
+                            do
+                            {
+                                if (error)
+                                {
+                                    Console.WriteLine("Error. Must be an nxn matrix. (EX: A matrix in the 3rd dimension must have 3 elements)");
+                                }
+
+                                error = false;
+                                Console.Write($"\nPlease input the unimodular matrix, C{i + 1} (delimited by commas ',' ...integers only): ");
+
+                                input = Console.ReadLine();
+
+                                input.Replace(" ", string.Empty);
+                                string[] inputs = input.Split(",");
+
+                                if (inputs.Length != inputInt)
+                                {
+                                    error = true;
+                                }
+                                else
+                                {
+                                    List<int> parsedInputs = new List<int>();
+
+                                    for (int ii = 0; ii < inputs.Length; ii++)
+                                    {
+                                        if (int.TryParse(inputs[ii], out int inputsInt))
+                                        {
+                                            parsedInputs.Add(inputsInt);
+                                        }
+                                        else
+                                        {
+                                            error = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!error)
+                                    {
+                                        output = "Parsed Input: ";
+                                        for (int pii = 0; pii < parsedInputs.Count; pii++)
+                                        {
+                                            output += $"{parsedInputs[pii]}, ";
+                                        }
+                                        output = $"{output.Substring(0, output.Length - 2)}.";
+
+                                        Console.WriteLine(output);
+
+                                        matrixC.Add(parsedInputs);
+                                    }
+                                }
+                            }
+                            while (error);
+                        }
+
+                        output = "\nThe unimodular matrix C is:\n";
+                        for (int i1 = 0; i1 < matrixC.Count; i1++)
+                        {
+                            output += $"C{i1 + 1} [";
+                            for (int i2 = 0; i2 < matrixC[i1].Count; i2++)
+                            {
+                                output += $"{matrixC[i1][i2]}, ";
+                                if (i2 == matrixC[i1].Count - 1)
+                                    output = output.Substring(0, output.Length - 2);
+                            }
+                            output += $"]\n";
+                        }
+                        Console.Write(output);
+
+                        diag1 = 1;
+                        for (int i = 0; i < inputInt; i++)
+                        {
+                            diag1 *= matrixC[i][i];
+                        }
+
+                        diag2 = 1;
+                        for (int i = 0; i < inputInt; i++)
+                        {
+                            diag2 *= matrixC[inputInt - (i + 1)][i];
+                        }
+
+                        det = diag1 - diag2;
+
+                        Console.WriteLine($"\nThe determinant of C, (det(C)) is: {det}");
+
+                        if (det != 1 && det != -1) // check if unimodular
+                            Console.WriteLine("Matrix C is NOT unimodular (det(C) is not +-1)...");
+                        else // if unimodular, continue
+                        {
+                            #region Y Matrix Calculations and Output
+                            List<List<int>> matrixY = new List<List<int>>();
+                            for (int i1 = 0; i1 < inputInt; i1++) // for each "row"
+                            {
+                                List<int> rowY = new List<int>();
+                                for (int i2 = 0; i2 < inputInt; i2++) // for each element within
+                                {
+                                    int val = 0;
+                                    for (int i3 = 0; i3 < inputInt; i3++) // we calculate the value of the element
+                                    {
+                                        val += (matrixC[i1][i3] * matrixX[i3][i2]); // add together the values of Matrix C at location "i1", "i3" multiplied by Matrix X at location "i3", "i2" ...this follows the calculation process done regularily when solving for Y using X and C.
+                                    }
+                                    rowY.Add(val); // add the value to a row
+                                }
+                                matrixY.Add(rowY); // add the row to the Y matrix
+                            }
+
+                            output = "\nThe matrix Y (a new basis for the same lattice) is:\n";
+                            for (int i1 = 0; i1 < matrixY.Count; i1++)
+                            {
+                                output += $"Y{i1 + 1} [";
+                                for (int i2 = 0; i2 < matrixY[i1].Count; i2++)
+                                {
+                                    output += $"{matrixY[i1][i2]}, ";
+                                    if (i2 == matrixY[i1].Count - 1)
+                                        output = output.Substring(0, output.Length - 2);
+                                }
+                                output += $"]\n";
+                            }
+                            Console.Write(output);
+                            #endregion
+                        }
+                    }
+
+                    // "END" OF PROGRAM
+                    Console.WriteLine("\nPress ESCAPE to close program, press ANY [other] KEY to restart.");
+                    ConsoleKeyInfo cki = Console.ReadKey();
+                    if (cki.Key == ConsoleKey.Escape) // if key pressed is ESC, cont is set to false and the program should exit, otherwise, it continues and "restarts"
+                        cont = false;
+                }
+                else
+                {
+                    Console.WriteLine("Syntax Error, input must be a REAL NUMBER...");
+                }
+            }
+            #endregion
+        }
+    }
+}                
